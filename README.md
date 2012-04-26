@@ -691,13 +691,16 @@ at all.
   the relevant code.
 * The annotation keyword is followed by a colon and a space, then a note
   describing the problem.
+* Include your initials and the date of your annotation so that if someone
+  comes back to it later they ask you or can detect stale annotations more 
+  easily.
 * If multiple lines are required to describe the problem, subsequent
   lines should be indented two spaces after the `#`.
 
     ```Ruby
     def bar
-      # FIXME: This has crashed occasionally since v3.2.1. It may
-      #   be related to the BarBazUtil upgrade.
+      # FIXME: (xz 2012-04) This has crashed occasionally since v3.2.1. It
+      #   may be related to the BarBazUtil upgrade.
       baz(:quux)
     end
     ```
