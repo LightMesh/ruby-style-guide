@@ -1302,23 +1302,28 @@ patch them.)
     ```
     
   - `define_method` is preferable to `class_eval{ def ... }`
-    
+  
+* Generate your code in a separate method to simplify testing and debugging.
 * When using `class_eval` (or other `eval`) with string interpolation, add a comment block showing its appearance if interpolated (a practice I learned from the rails code):
 
     ```ruby
+    def ruby_for_unsafe_method(name)
+      <<-EOT, __FILE__, __LINE__ + 1
+        def #{name}(*args, &block)       # def capitalize(*args, &block)
+          to_str.#{name}(*args, &block)  #   to_str.capitalize(*args, &block)
+        end                              # end
+
+        def #{name}!(*args)              # def capitalize!(*args)
+          @dirty = true                  #   @dirty = true
+          super                          #   super
+        end                              # end
+      EOT
+    end
+    
     # from activesupport/lib/active_support/core_ext/string/output_safety.rb
     UNSAFE_STRING_METHODS.each do |unsafe_method|
       if 'String'.respond_to?(unsafe_method)
-        class_eval <<-EOT, __FILE__, __LINE__ + 1
-          def #{unsafe_method}(*args, &block)       # def capitalize(*args, &block)
-            to_str.#{unsafe_method}(*args, &block)  #   to_str.capitalize(*args, &block)
-          end                                       # end
-
-          def #{unsafe_method}!(*args)              # def capitalize!(*args)
-            @dirty = true                           #   @dirty = true
-            super                                   #   super
-          end                                       # end
-        EOT
+        class_eval ruby_for_unsafe_method(unsafe_method)
       end
     end
     ```
