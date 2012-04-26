@@ -1308,7 +1308,8 @@ patch them.)
 
     ```ruby
     def ruby_for_unsafe_method(name)
-      <<-EOT, __FILE__, __LINE__ + 1
+      line = __LINE__ + 2
+      str = <<-EOT
         def #{name}(*args, &block)       # def capitalize(*args, &block)
           to_str.#{name}(*args, &block)  #   to_str.capitalize(*args, &block)
         end                              # end
@@ -1318,12 +1319,13 @@ patch them.)
           super                          #   super
         end                              # end
       EOT
+      [str, __FILE__, line]
     end
     
     # from activesupport/lib/active_support/core_ext/string/output_safety.rb
     UNSAFE_STRING_METHODS.each do |unsafe_method|
       if 'String'.respond_to?(unsafe_method)
-        class_eval ruby_for_unsafe_method(unsafe_method)
+        class_eval *ruby_for_unsafe_method(unsafe_method)
       end
     end
     ```
